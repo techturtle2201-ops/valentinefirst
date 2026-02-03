@@ -25,6 +25,7 @@
       color: white;
     }
 
+    /* BACKGROUND HEARTS */
     .bg-heart {
       position: fixed;
       bottom: -30px;
@@ -36,14 +37,15 @@
     }
 
     @keyframes floatBg {
-      from { transform: translateY(0); opacity: 0; }
+      from { transform: translateY(0) scale(1); opacity: 0; }
       10% { opacity: 0.8; }
-      to { transform: translateY(-110vh); opacity: 0; }
+      to { transform: translateY(-110vh) scale(1.4); opacity: 0; }
     }
 
     .countdown {
       font-size: 3.5rem;
       font-weight: bold;
+      animation: pop .6s ease;
       z-index: 2;
     }
 
@@ -57,6 +59,7 @@
       box-shadow: 0 20px 60px rgba(0,0,0,.25);
       width: 100%;
       max-width: 360px;
+      animation: fadeIn .6s ease forwards;
       z-index: 2;
     }
 
@@ -77,9 +80,9 @@
       border: none;
       font-size: 1.05rem;
       cursor: pointer;
+      transition: transform .25s ease;
       position: absolute;
       min-width: 120px;
-      transition: transform .25s ease;
     }
 
     #yesBtn {
@@ -103,8 +106,10 @@
       margin-top: 1.5rem;
       font-size: 1.3rem;
       color: var(--pink);
+      animation: pop .7s ease forwards;
     }
 
+    /* FINAL MESSAGE OVERLAY */
     .overlay {
       position: fixed;
       inset: 0;
@@ -124,20 +129,38 @@
       text-align: center;
       width: 100%;
       max-width: 340px;
+      animation: pop .6s ease forwards;
+    }
+
+    .final-message h2 {
+      color: var(--pink);
+      margin-bottom: 1rem;
     }
 
     .typing {
       font-size: 1.05rem;
       line-height: 1.5;
+      min-height: 120px;
       white-space: pre-line;
-      min-height: 100px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes pop {
+      from { transform: scale(.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
 
+  <!-- COUNTDOWN -->
   <div class="countdown" id="countdown">3</div>
 
+  <!-- CARD -->
   <div class="card" id="card">
     <h1>Will you be my Valentine? ❤️</h1>
 
@@ -149,9 +172,10 @@
     <div class="success" id="success">Yayyy!!! 💕</div>
   </div>
 
+  <!-- FINAL MESSAGE -->
   <div class="overlay" id="overlay">
     <div class="final-message">
-      <h2 id="overlayTitle"></h2>
+      <h2>💌 A Little Surprise</h2>
       <div class="typing" id="typing"></div>
       <p style="margin-top:1rem;font-size:.85rem;color:#777;">
         (Tap anywhere to close)
@@ -167,9 +191,8 @@
     const success = document.getElementById("success");
     const overlay = document.getElementById("overlay");
     const typingEl = document.getElementById("typing");
-    const overlayTitle = document.getElementById("overlayTitle");
 
-    const YES_TEXT =
+    const FINAL_TEXT =
 `I just want you to know…
 
 You mean so much to me ❤️
@@ -178,14 +201,7 @@ and I’m really happy you’re in my life.
 
 Happy Valentine’s Day 💖`;
 
-    const NO_TEXT =
-`It’s okay…
-I respect your choice.
-
-But I just want you to know,
-you still mean a lot to me ❤️
-And I’m grateful for every moment we shared.`;
-
+    /* Countdown */
     let count = 3;
     const timer = setInterval(() => {
       count--;
@@ -198,18 +214,12 @@ And I’m grateful for every moment we shared.`;
       }
     }, 900);
 
-    /* NO BUTTON LOGIC */
-    let dodgeCount = 0;
-    const MAX_DODGES = 5;
+    /* No button behavior */
     let yesScale = 1;
+    noBtn.addEventListener("mouseenter", moveNo);
+    noBtn.addEventListener("touchstart", moveNo);
 
-    noBtn.addEventListener("mouseenter", tryDodge);
-    noBtn.addEventListener("touchstart", tryDodge);
-
-    function tryDodge() {
-      if (dodgeCount >= MAX_DODGES) return;
-
-      dodgeCount++;
+    function moveNo() {
       const x = Math.random() * 120 - 60;
       const y = Math.random() * 60 - 30;
       noBtn.style.transform = `translate(${x}px, ${y}px)`;
@@ -218,15 +228,13 @@ And I’m grateful for every moment we shared.`;
       yesBtn.style.transform = `translateX(-50%) scale(${yesScale})`;
     }
 
-    noBtn.addEventListener("click", () => {
-      if (dodgeCount < MAX_DODGES) return;
-
-      showOverlay("I Understand 💔", NO_TEXT);
-    });
-
+    /* Yes click */
     yesBtn.addEventListener("click", () => {
       success.style.display = "block";
-      setTimeout(() => showOverlay("💌 A Little Surprise", YES_TEXT), 600);
+      setTimeout(() => {
+        overlay.style.display = "flex";
+        startTyping();
+      }, 600);
     });
 
     overlay.addEventListener("click", () => {
@@ -234,22 +242,18 @@ And I’m grateful for every moment we shared.`;
       typingEl.textContent = "";
     });
 
-    function showOverlay(title, text) {
-      overlayTitle.textContent = title;
-      overlay.style.display = "flex";
-      typeText(text);
-    }
-
-    function typeText(text) {
+    /* TYPEWRITER EFFECT */
+    function startTyping() {
       let i = 0;
       typingEl.textContent = "";
       const interval = setInterval(() => {
-        typingEl.textContent += text[i];
+        typingEl.textContent += FINAL_TEXT[i];
         i++;
-        if (i >= text.length) clearInterval(interval);
+        if (i >= FINAL_TEXT.length) clearInterval(interval);
       }, 45);
     }
 
+    /* BACKGROUND HEARTS */
     setInterval(() => {
       const heart = document.createElement("div");
       heart.className = "bg-heart";
@@ -264,4 +268,3 @@ And I’m grateful for every moment we shared.`;
 
 </body>
 </html>
-
