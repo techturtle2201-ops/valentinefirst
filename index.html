@@ -37,15 +37,9 @@
     }
 
     @keyframes floatBg {
-      from {
-        transform: translateY(0) scale(1);
-        opacity: 0;
-      }
+      from { transform: translateY(0) scale(1); opacity: 0; }
       10% { opacity: 0.8; }
-      to {
-        transform: translateY(-110vh) scale(1.4);
-        opacity: 0;
-      }
+      to { transform: translateY(-110vh) scale(1.4); opacity: 0; }
     }
 
     .countdown {
@@ -115,7 +109,7 @@
       animation: pop .5s ease forwards;
     }
 
-    /* FINAL MESSAGE */
+    /* FINAL MESSAGE OVERLAY */
     .overlay {
       position: fixed;
       inset: 0;
@@ -140,7 +134,14 @@
 
     .final-message h2 {
       color: var(--pink);
-      margin-bottom: .75rem;
+      margin-bottom: 1rem;
+    }
+
+    .typing {
+      font-size: 1.05rem;
+      line-height: 1.5;
+      min-height: 120px;
+      white-space: pre-line;
     }
 
     @keyframes fadeIn {
@@ -174,12 +175,9 @@
   <!-- FINAL MESSAGE -->
   <div class="overlay" id="overlay">
     <div class="final-message">
-      <h2>Happy Valentine’s Day ❤️</h2>
-      <p>
-        Thank you for saying yes.<br />
-        You made my day truly special 💖
-      </p>
-      <p style="margin-top:.75rem;font-size:.85rem;color:#777;">
+      <h2>💌 A Little Surprise</h2>
+      <div class="typing" id="typing"></div>
+      <p style="margin-top:1rem;font-size:.85rem;color:#777;">
         (Tap anywhere to close)
       </p>
     </div>
@@ -192,6 +190,16 @@
     const noBtn = document.getElementById("noBtn");
     const success = document.getElementById("success");
     const overlay = document.getElementById("overlay");
+    const typingEl = document.getElementById("typing");
+
+    const FINAL_TEXT =
+`I just want you to know…
+
+You mean so much to me ❤️
+Every moment with you feels special,
+and I’m really happy you’re in my life.
+
+Happy Valentine’s Day 💖`;
 
     /* Countdown */
     let count = 3;
@@ -223,14 +231,29 @@
     /* Yes click */
     yesBtn.addEventListener("click", () => {
       success.style.display = "block";
-      setTimeout(() => overlay.style.display = "flex", 600);
+      setTimeout(() => {
+        overlay.style.display = "flex";
+        startTyping();
+      }, 600);
     });
 
     overlay.addEventListener("click", () => {
       overlay.style.display = "none";
+      typingEl.textContent = "";
     });
 
-    /* BACKGROUND HEART SPAWNER */
+    /* TYPEWRITER EFFECT */
+    function startTyping() {
+      let i = 0;
+      typingEl.textContent = "";
+      const interval = setInterval(() => {
+        typingEl.textContent += FINAL_TEXT[i];
+        i++;
+        if (i >= FINAL_TEXT.length) clearInterval(interval);
+      }, 45);
+    }
+
+    /* BACKGROUND HEARTS */
     setInterval(() => {
       const heart = document.createElement("div");
       heart.className = "bg-heart";
@@ -239,7 +262,6 @@
       heart.style.fontSize = 14 + Math.random() * 20 + "px";
       heart.style.animationDuration = 6 + Math.random() * 6 + "s";
       document.body.appendChild(heart);
-
       setTimeout(() => heart.remove(), 12000);
     }, 400);
   </script>
