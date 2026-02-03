@@ -8,7 +8,10 @@
   <style>
     :root { --pink: #ff4d6d; }
 
-    * { box-sizing: border-box; font-family: "Segoe UI", system-ui, sans-serif; }
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
 
     body {
       margin: 0;
@@ -26,17 +29,23 @@
       position: fixed;
       bottom: -30px;
       font-size: 18px;
+      opacity: 0.8;
       animation: floatBg linear infinite;
       pointer-events: none;
+      z-index: 0;
     }
 
     @keyframes floatBg {
       from { transform: translateY(0); opacity: 0; }
-      10% { opacity: .8; }
+      10% { opacity: 0.8; }
       to { transform: translateY(-110vh); opacity: 0; }
     }
 
-    .countdown { font-size: 3.5rem; }
+    .countdown {
+      font-size: 3.5rem;
+      font-weight: bold;
+      z-index: 2;
+    }
 
     .card {
       display: none;
@@ -45,14 +54,22 @@
       padding: 2rem;
       border-radius: 20px;
       text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
       width: 100%;
       max-width: 360px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      z-index: 2;
     }
 
-    h1 { color: var(--pink); margin-bottom: 2rem; }
+    h1 {
+      color: var(--pink);
+      font-size: 1.6rem;
+      margin-bottom: 2rem;
+    }
 
-    .buttons { position: relative; height: 110px; }
+    .buttons {
+      position: relative;
+      height: 110px;
+    }
 
     button {
       padding: 14px 28px;
@@ -81,6 +98,13 @@
       color: #666;
     }
 
+    .success {
+      display: none;
+      margin-top: 1.5rem;
+      font-size: 1.3rem;
+      color: var(--pink);
+    }
+
     .overlay {
       position: fixed;
       inset: 0;
@@ -102,152 +126,142 @@
       max-width: 340px;
     }
 
-    .typing { white-space: pre-line; min-height: 100px; }
-
-    .choice-btns {
-      margin-top: 1.2rem;
-      display: flex;
-      gap: .5rem;
-      justify-content: center;
-    }
-
-    .choice-btns button {
-      position: static;
-      min-width: auto;
-      padding: 10px 16px;
-      font-size: .9rem;
+    .typing {
+      font-size: 1.05rem;
+      line-height: 1.5;
+      white-space: pre-line;
+      min-height: 100px;
     }
   </style>
 </head>
 <body>
 
-<div class="countdown" id="countdown">3</div>
+  <div class="countdown" id="countdown">3</div>
 
-<div class="card" id="card">
-  <h1>Will you be my Valentine? ❤️</h1>
-  <div class="buttons">
-    <button id="noBtn">No 🙈</button>
-    <button id="yesBtn">Yes 💖</button>
+  <div class="card" id="card">
+    <h1>Will you be my Valentine? ❤️</h1>
+
+    <div class="buttons">
+      <button id="noBtn">No 🙈</button>
+      <button id="yesBtn">Yes 💖</button>
+    </div>
+
+    <div class="success" id="success">Yayyy!!! 💕</div>
   </div>
-</div>
 
-<div class="overlay" id="overlay">
-  <div class="final-message">
-    <h2 id="overlayTitle"></h2>
-    <div class="typing" id="typing"></div>
-    <div class="choice-btns" id="choices"></div>
-    <p style="font-size:.8rem;color:#777;margin-top:.5rem">
-      (Tap anywhere to close)
-    </p>
+  <div class="overlay" id="overlay">
+    <div class="final-message">
+      <h2 id="overlayTitle"></h2>
+      <div class="typing" id="typing"></div>
+      <p style="margin-top:1rem;font-size:.85rem;color:#777;">
+        (Tap anywhere to close)
+      </p>
+    </div>
   </div>
-</div>
 
-<script>
-const countdownEl = document.getElementById("countdown");
-const card = document.getElementById("card");
-const yesBtn = document.getElementById("yesBtn");
-const noBtn = document.getElementById("noBtn");
-const overlay = document.getElementById("overlay");
-const typingEl = document.getElementById("typing");
-const overlayTitle = document.getElementById("overlayTitle");
-const choices = document.getElementById("choices");
+  <script>
+    const countdownEl = document.getElementById("countdown");
+    const card = document.getElementById("card");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const success = document.getElementById("success");
+    const overlay = document.getElementById("overlay");
+    const typingEl = document.getElementById("typing");
+    const overlayTitle = document.getElementById("overlayTitle");
 
-const YES_TEXT = `You really made my day ❤️
-Thank you for choosing me.
+    const YES_TEXT =
+`I just want you to know…
+
+You mean so much to me ❤️
+Every moment with you feels special,
+and I’m really happy you’re in my life.
+
 Happy Valentine’s Day 💖`;
 
-const NO_TEXT = `It’s okay…
+    const NO_TEXT =
+`It’s okay…
 I respect your choice.
 
-You’ll always mean something to me ❤️`;
+But I just want you to know,
+you still mean a lot to me ❤️
+And I’m grateful for every moment we shared.`;
 
-let count = 3;
-const timer = setInterval(() => {
-  count--;
-  if (count === 0) {
-    clearInterval(timer);
-    countdownEl.style.display = "none";
-    card.style.display = "block";
-  } else countdownEl.textContent = count;
-}, 900);
+    let count = 3;
+    const timer = setInterval(() => {
+      count--;
+      if (count === 0) {
+        clearInterval(timer);
+        countdownEl.style.display = "none";
+        card.style.display = "block";
+      } else {
+        countdownEl.textContent = count;
+      }
+    }, 900);
 
-/* No button dodge */
-let dodgeCount = 0;
-const MAX_DODGES = 5;
-let yesScale = 1;
+    /* NO BUTTON LOGIC */
+    let dodgeCount = 0;
+    const MAX_DODGES = 5;
+    let yesScale = 1;
 
-noBtn.addEventListener("mouseenter", dodge);
-noBtn.addEventListener("touchstart", dodge);
+    noBtn.addEventListener("mouseenter", tryDodge);
+    noBtn.addEventListener("touchstart", tryDodge);
 
-function dodge() {
-  if (dodgeCount >= MAX_DODGES) return;
-  dodgeCount++;
-  noBtn.style.transform =
-    `translate(${Math.random()*120-60}px,${Math.random()*60-30}px)`;
-  yesScale += .12;
-  yesBtn.style.transform = `translateX(-50%) scale(${yesScale})`;
-}
+    function tryDodge() {
+      if (dodgeCount >= MAX_DODGES) return;
 
-/* No click -> Are you sure */
-noBtn.addEventListener("click", () => {
-  if (dodgeCount < MAX_DODGES) return;
-  showConfirm();
-});
+      dodgeCount++;
+      const x = Math.random() * 120 - 60;
+      const y = Math.random() * 60 - 30;
+      noBtn.style.transform = `translate(${x}px, ${y}px)`;
 
-yesBtn.addEventListener("click", () => {
-  showOverlay("💌 A Little Surprise", YES_TEXT);
-});
+      yesScale += 0.12;
+      yesBtn.style.transform = `translateX(-50%) scale(${yesScale})`;
+    }
 
-function showConfirm() {
-  overlayTitle.textContent = "Are you sure? 💔";
-  typingEl.textContent = "I just want to be sure about your choice…";
-  choices.innerHTML = `
-    <button onclick="finalNo()">Yes, I’m sure</button>
-    <button onclick="finalYes()">Wait… maybe Yes 💖</button>
-  `;
-  overlay.style.display = "flex";
-}
+    noBtn.addEventListener("click", () => {
+      if (dodgeCount < MAX_DODGES) return;
 
-function finalNo() {
-  choices.innerHTML = "";
-  typeText(NO_TEXT);
-}
+      showOverlay("I Understand 💔", NO_TEXT);
+    });
 
-function finalYes() {
-  choices.innerHTML = "";
-  typeText(YES_TEXT);
-}
+    yesBtn.addEventListener("click", () => {
+      success.style.display = "block";
+      setTimeout(() => showOverlay("💌 A Little Surprise", YES_TEXT), 600);
+    });
 
-function showOverlay(title, text) {
-  overlayTitle.textContent = title;
-  choices.innerHTML = "";
-  overlay.style.display = "flex";
-  typeText(text);
-}
+    overlay.addEventListener("click", () => {
+      overlay.style.display = "none";
+      typingEl.textContent = "";
+    });
 
-function typeText(text) {
-  typingEl.textContent = "";
-  let i = 0;
-  const t = setInterval(() => {
-    typingEl.textContent += text[i++];
-    if (i >= text.length) clearInterval(t);
-  }, 40);
-}
+    function showOverlay(title, text) {
+      overlayTitle.textContent = title;
+      overlay.style.display = "flex";
+      typeText(text);
+    }
 
-overlay.addEventListener("click", () => overlay.style.display = "none");
+    function typeText(text) {
+      let i = 0;
+      typingEl.textContent = "";
+      const interval = setInterval(() => {
+        typingEl.textContent += text[i];
+        i++;
+        if (i >= text.length) clearInterval(interval);
+      }, 45);
+    }
 
-/* Hearts */
-setInterval(() => {
-  const h = document.createElement("div");
-  h.className = "bg-heart";
-  h.textContent = "❤️";
-  h.style.left = Math.random()*100+"vw";
-  h.style.fontSize = 14+Math.random()*20+"px";
-  h.style.animationDuration = 6+Math.random()*6+"s";
-  document.body.appendChild(h);
-  setTimeout(() => h.remove(), 12000);
-}, 400);
-</script>
+    setInterval(() => {
+      const heart = document.createElement("div");
+      heart.className = "bg-heart";
+      heart.textContent = "❤️";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.fontSize = 14 + Math.random() * 20 + "px";
+      heart.style.animationDuration = 6 + Math.random() * 6 + "s";
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 12000);
+    }, 400);
+  </script>
 
 </body>
 </html>
+
